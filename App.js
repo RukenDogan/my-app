@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Pressable, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, Pressable, ImageBackground, SafeAreaView } from 'react-native';
 
 
-const bgImage = {uri: 'https://images.pexels.com/photos/7736066/pexels-photo-7736066.jpeg'}
+const bgImage = { uri: 'https://images.pexels.com/photos/7736066/pexels-photo-7736066.jpeg' }
 
 export default function App() { // Composant principal de l'application
   const [inputText, setInputText] = useState(''); // État pour stocker le texte de l'input
@@ -18,10 +18,11 @@ export default function App() { // Composant principal de l'application
 
   return (
     <ImageBackground source={bgImage} style={styles.bgImage}>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Text style={styles.text1}>Open up <Text style={styles.app}>App.js</Text> to start working on your app!</Text>
 
         <View style={styles.inputContainer}>
+
           <TextInput
             style={styles.textInput}
             value={inputText}
@@ -29,44 +30,53 @@ export default function App() { // Composant principal de l'application
             placeholderTextColor="white"
             onChangeText={newText => setInputText(newText)}
           />
-          <TouchableOpacity onPress={onPress}>
+          <Pressable
+            onPress={onPress}
+            android_ripple={{ color: 'lightblue' }}
+          >
             <Text style={styles.buttonAdd}>Add</Text>
-          </TouchableOpacity>
-        </View>
+          </Pressable>
 
+        </View>
 
         <Text style={styles.title}>Mes objectifs :</Text>
 
-        {goals.map((goal, index) => (
-          <View key={index} style={styles.textGoal}>
-            <Text style={styles.text}>{goal}</Text>
+        <FlatList
+          data={goals}
+          keyExtractor={(index) => index.toString()}
+          renderItem={({ item, index }) => (
 
-            <Pressable
-              onPress={() => {
-                const newGoals = goals.filter((_, i) => i !== index); // Supprime l'objectif à l'index donné
-                setGoals(newGoals); // Met à jour la liste des objectifs
-              }}
-              style={styles.deleteButton}
-            >
-              <Text style={styles.deleteButtonText}>X</Text>
-            </Pressable>
+            <View key={index} style={styles.textGoal}>
+              <Text style={styles.text}>{item}</Text>
 
-          </View>
-        ))}
+              <Pressable
+                onPress={() => {
+                  const newGoals = goals.filter((_, i) => i !== index);
+                  setGoals(newGoals);
+                }}
+                style={styles.deleteButton}
+              >
+                <Text style={styles.deleteButtonText}>X</Text>
+              </Pressable>
+
+            </View>
+          )}
+        />
 
         <StatusBar style="auto" />
-      </View >
-    </ImageBackground>
+      </SafeAreaView>
+    </ImageBackground >
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent', // Permet de voir l'image de fond
+    flex: 1,
+    padding: 50,
   },
 
   text1: {
@@ -113,6 +123,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     color: 'white',
     fontWeight: 'bold',
+
   },
 
   deleteButton: {
@@ -132,7 +143,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '90%',
+    width: '100%',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
@@ -157,4 +168,3 @@ const sampleGoals = [
   'Organiser un meetup autour de la tech',
   'Faire un triathlon',
 ];
-
