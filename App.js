@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, FlatList, Pressable, ImageBackground, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, Pressable, ImageBackground, SafeAreaView, Modal } from 'react-native';
 
 
 const bgImage = { uri: 'https://images.pexels.com/photos/7736066/pexels-photo-7736066.jpeg' }
 
 export default function App() { // Composant principal de l'application
   const [inputText, setInputText] = useState(''); // État pour stocker le texte de l'input
-  const [goals, setGoals] = useState(sampleGoals); // État pour stocker les objectifs
+  const [goals, setGoals] = useState(sampleGoals); // État pour stocker les objectifs, initialisé avec des objectifs d'exemple (pour faire fonctionner la modale de suppression)
+
+  const [modalVisible, setModalVisible] = useState(false); // Contrôle de la modale
+  const [goalToDeleteIndex, setGoalToDeleteIndex] = useState(null); // L'objectif sélectionné
+
 
   const onPress = () => { // Fonction appelée lors de l'appui sur le bouton "Add"
     if (inputText.trim() !== '') { // Vérifie si le champ n'est pas vide
@@ -19,6 +23,7 @@ export default function App() { // Composant principal de l'application
   return (
     <ImageBackground source={bgImage} style={styles.bgImage}>
       <SafeAreaView style={styles.container}>
+
         <Text style={styles.text1}>Open up <Text style={styles.app}>App.js</Text> to start working on your app!</Text>
 
         <View style={styles.inputContainer}>
@@ -30,9 +35,15 @@ export default function App() { // Composant principal de l'application
             placeholderTextColor="white"
             onChangeText={newText => setInputText(newText)}
           />
+
           <Pressable
             onPress={onPress}
-            android_ripple={{ color: 'lightblue' }}
+            android_ripple={{
+              color: 'lightblue',
+              foreground: true,
+              borderless: true,
+              radius: 30,
+            }}
           >
             <Text style={styles.buttonAdd}>Add</Text>
           </Pressable>
@@ -51,8 +62,8 @@ export default function App() { // Composant principal de l'application
 
               <Pressable
                 onPress={() => {
-                  const newGoals = goals.filter((_, i) => i !== index);
-                  setGoals(newGoals);
+                  setGoalToDeleteIndex(index);
+                  setModalVisible(true);
                 }}
                 style={styles.deleteButton}
               >
@@ -62,6 +73,41 @@ export default function App() { // Composant principal de l'application
             </View>
           )}
         />
+
+        <Modal
+          transparent={true}
+          visible={modalVisible}
+          animationType="fade"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalText}>Supprimer cet objectif ?</Text>
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={styles.cancelButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.cancelText}>Annuler</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.confirmButton}
+                  onPress={() => {
+                    if (goalToDeleteIndex !== null) {
+                      const newGoals = goals.filter((_, i) => i !== goalToDeleteIndex);
+                      setGoals(newGoals);
+                      setGoalToDeleteIndex(null);
+                      setModalVisible(false);
+                    }
+                  }}
+                >
+                  <Text style={styles.confirmText}>Confirmer</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
 
         <StatusBar style="auto" />
       </SafeAreaView>
@@ -153,6 +199,56 @@ const styles = StyleSheet.create({
     // width: '100%',
     // height: '100%',
   },
+
+
+  modalBackground: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+modalContainer: {
+  backgroundColor: 'white',
+  padding: 20,
+  borderRadius: 10,
+  width: '80%',
+  alignItems: 'center',
+},
+
+modalText: {
+  fontSize: 18,
+  marginBottom: 20,
+  textAlign: 'center',
+},
+
+modalActions: {
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  width: '100%',
+},
+
+cancelButton: {
+  padding: 10,
+  backgroundColor: 'gray',
+  borderRadius: 5,
+},
+
+cancelText: {
+  color: 'white',
+  fontWeight: 'bold',
+},
+
+confirmButton: {
+  padding: 10,
+  backgroundColor: 'red',
+  borderRadius: 5,
+},
+
+confirmText: {
+  color: 'white',
+  fontWeight: 'bold',
+},
 
 });
 
